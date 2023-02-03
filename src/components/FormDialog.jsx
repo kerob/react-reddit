@@ -1,7 +1,15 @@
 import { useEffect, useRef } from "react";
-import { login } from "../providers/AuthProvider";
+import { login, useAuth } from "../providers/AuthProvider";
+import IconBtn from "./IconBtn";
+import { GrFormClose } from "react-icons/gr";
+
+function SignInForm() {}
+function RegisterForm() {}
+
+function CreateThreadForm() {}
 
 export default function FormDialog({ showForm, closeForm }) {
+  const { currentUser } = useAuth();
   const formRef = useRef();
   const emailRef = useRef();
   const passwordRef = useRef();
@@ -10,19 +18,32 @@ export default function FormDialog({ showForm, closeForm }) {
     showForm ? formRef.current.showModal() : formRef.current.close();
   }, [showForm]);
 
+  // function handleFormDialog(e) {
+  //   e.preventDefault();
+
+  //   const form = e.target;
+  //   const formData = new FormData(form);
+  //   const formJson = Object.fromEntries(formData.entries());
+
+  //   login("email", formJson.email, formJson.password, formRef.current.close());
+  // }
+
   return (
     <dialog ref={formRef}>
       <div className="dialog-header">
-        <button
-          onClick={() => {
+        <IconBtn
+          Icon={GrFormClose}
+          func={() => {
             closeForm();
           }}
-        >
-          alskdfjsdlkfj
-        </button>
+        />
       </div>
       <h2>Sign In</h2>
-      <form className="sign-in__form" method="dialog">
+      <form
+        className="sign-in__form"
+        method="dialog"
+        // onSubmit={handleFormDialog}
+      >
         <label htmlFor="email">Email</label>
         <input
           type="email"

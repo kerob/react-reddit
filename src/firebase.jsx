@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import {
   getFirestore,
   collection,
@@ -11,12 +12,15 @@ import {
   where,
   doc,
   getDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
   useCollection,
   useCollectionData,
 } from "react-firebase-hooks/firestore";
+import { useThreadUpdate } from "./providers/ThreadProvider";
+import { randomStringGenerator } from "./util/RandomStringGenerator";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_APP_FIREBASE_API_KEY,
@@ -32,14 +36,44 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore();
+const storage = getStorage(app);
 
 const usersRef = collection(db, "users");
 const postsRef = collection(db, "posts");
 const threadsRef = collection(db, "threads");
+const storageRef = ref(storage);
+
+export function useStorage(file, id) {
+  const fileRef = ref(
+    storage,
+    `images/${file.name}+${randomStringGenerator(10)}`
+  );
+  uploadBytes(fileRef, file).then((snapshot) => {
+    getDownloadURL(snapshot.ref).then((url) => {
+      const docRef = doc(db, "threads", id);
+      updateDoc(docRef, { imageUrl: url });
+      console.log("file uploaded at " + url);
+    });
+  });
+}
 
 export function getThread(id) {
-  const docRef = doc(db, "threads", id);
-  return getDoc(docRef);
+  const [thread, setThread] = useState();
+  const func = useThreadUpdate();
+
+  useEffect(() => {
+    const docRef = doc(db, "threads", id);
+    getDoc(docRef).then((doc) => {
+      let item = { ...doc.data(), id: id };
+      console.log(item);
+      setThread(item);
+      func(item);
+      // useThreadUpdate(doc.data());
+    });
+  }, []);
+
+  // console.log(thread);
+  return thread;
 }
 
 export function getThreads() {
@@ -63,7 +97,7 @@ export function getThreads() {
   // return () => output();
 }
 
-export function addThread(user, uid, title, post) {
+export function addThread(user, uid, title, post, image) {
   const date = new Date();
   addDoc(threadsRef, {
     userid: uid,
@@ -73,6 +107,12 @@ export function addThread(user, uid, title, post) {
     title: title,
     content: post,
     rating: 0,
+  }).then((thread) => {
+    if (image) {
+      console.log("storing image");
+      useStorage(image, thread.id);
+    }
+    console.log("thread added");
   });
 }
 

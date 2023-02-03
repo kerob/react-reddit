@@ -120,10 +120,12 @@ button {
 
 :root {
   /* Colors */
-  --clr-dark: 219 14% 20%;
-  --clr-light: 0 0% 100%;
+  --clr-main: 0 0% 100%;
   --clr-bg: 210 16% 93%;
+  --clr-text: black;
+  --clr-highlight: blue;
   --clr-secondary: 208 7% 46%;
+  --clr-inactive: yellow;
 
   /* Font-sizes */
   /* --fs-900: 4.675rem;
@@ -170,10 +172,20 @@ button {
 
 /* Colors Classes */
 .bg-dark {background-color: hsl(var(--clr-dark));}
-.bg-light {background-color: hsl(var(--clr-light));}
+.bg-light {background-color: hsl(var(--clr-main));}
 
 .txt-dark {color: hsl(var(--clr-dark));}
-.txt-light {color: hsl(var(--clr-light));}
+.txt-light {color: hsl(var(--clr-main));}
+
+[data-theme="dark"] {
+  --clr-main: 219 14% 20%;
+  --clr-bg: 0 0% 3%;
+  --clr-secondary: 0 0% 46%;
+  --clr-text: white;
+  --clr-highlight: blue;
+  --clr-inactive: yellow;
+
+}
 
 /* Typology Classes*/
 .uppercase {text-transform: uppercase;}
@@ -205,22 +217,27 @@ body {
 
 button {
   background-color: hsl(var(--clr-secondary));
-  color: white;
+  color: hsl(var(--clr-main));
 }
 
 .App {
-  padding: 15px;
+  /* padding: 15px; */
+  color: hsl(var(--clr-text))
+}
+
+.main-window {
+  padding: .5rem 1rem;
 }
 
 /* General Styling */
 .post-container {
   /* border-radius: 10px;
   border: 2px solid hsl(var(--clr-secondary)); */
-  background-color: white;
+  background-color: hsl(var(--clr-main));
   padding-inline: 1em;
   margin-block: 1em;
   max-width: 100vw;
-  box-shadow: 0px 1px 2px 0px hsl(var(--clr-secondary));
+  box-shadow: var(--shadow);
 }
 
 
@@ -230,17 +247,22 @@ nav {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-}
-
-
-
-.nav-test {
   align-items: center;
+  background-color: hsl(var(--clr-main));
+  padding-inline: 2rem;
+  box-shadow: var(--shadow);
+
 }
+
+
+
+/* .nav-test {
+  align-items: center;
+} */
 
 .nav-button {
   --button-size: calc(var(--nav-size) * 0.5);
-  background-color: hsl(var(--clr-secondary));
+  background-color: hsl(var(--clr-main))e;
   width: var(--button-size);
   height: var(--button-size);
   border-radius: 50%;
@@ -253,7 +275,9 @@ nav {
 }
 
 .nav-button:is(:hover, :active, :focus) {
-  filter: brightness(1.2)
+  filter: brightness(1.2);
+  background-color: hsl(var(--clr-secondary));
+  color: hsl(var(--clr-main));
 }
 
 .dropdown {
@@ -284,7 +308,7 @@ nav {
 .menu-item:is(:hover, :focus, :active),
 .menu-button:is(:hover, :focus, :active) {
   background-color: hsl(var(--clr-secondary));
-  color: white;
+  color: hsl(var(--clr-main));
 }
 
 .icon-button {
@@ -297,7 +321,7 @@ nav {
 /* .nav-menu{
   position: fixed;
     background: var(--clr-dark);
-    color: var(--clr-light);
+    color: var(--clr-main);
     top: 0;
     bottom: 0;
     left: 0;
@@ -333,14 +357,21 @@ dialog::backdrop {
   right: 0px;
   bottom: 0px;
   left: 0px;
-  background: white; */
+  background: hsl(var(--clr-main)); */
 }
 
-.sign-in h2 {
+.dialog-header {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.sign-in h2, .create-thread h2 {
   text-align: center;
 }
 
-.sign-in__form input{
+.sign-in__form input,
+.create-thread__form input,
+.create-thread__form textarea{
   width: 100%;
   padding: 12px 20px;
   margin: 8px 0;
@@ -349,9 +380,10 @@ dialog::backdrop {
   box-sizing: border-box;
 }
 
-.sign-in__button {
+.sign-in__button,
+.create-thread__button {
 
-  color: hsl(var(--clr-light));
+  color: hsl(var(--clr-main));
   padding: 14px 20px;
   margin: 8px 0;
   border: none;
@@ -359,7 +391,8 @@ dialog::backdrop {
   width: 100%;
 }
 
-.sign-in__button:hover {
+.sign-in__button:hover,
+.create-thread__button:hover {
   --btn-clr: #04AA60;
   background-color: var(--btn-clr);
 }
@@ -390,15 +423,25 @@ dialog::backdrop {
 }
 
 .thread_container {
-  background-color: white;
+  background-color: hsl(var(--clr-main));
+  border-left: .2rem solid hsl(var(--clr-secondary));
   margin-block: 1em;
-  padding-inline: 1em;
+  padding: .25em 1em;
   display: flex;
   gap: 1em;
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
   box-shadow: var(--shadow);
+}
+
+.thread_title {
+  text-decoration: none;
+}
+
+.thread_title:is(:hover,:focus,:active){
+  filter: brightness(.75);
+  color: red;
 }
 
 .thread_rating {
@@ -424,12 +467,12 @@ dialog::backdrop {
 
 .comment_current-user {
   background-color: blueviolet;
-  color: white;
+  color: hsl(var(--clr-main));
 }
 
 .comment_op{
   background-color: forestgreen;
-  color: white;
+  color: hsl(var(--clr-main));
 }
 
 .comment_hidden {
@@ -439,7 +482,7 @@ dialog::backdrop {
 }
 
 .comment_container {
-  background-color: white;
+  background-color: hsl(var(--clr-main));
   max-width: 100vw;
   margin-block: .5em;
   box-shadow: 0px 1px 2px 0px hsl(var(--clr-secondary));

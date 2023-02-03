@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useThread } from "./providers/ThreadProvider";
-import { convertDate } from "./util/Date";
+import { useThread, useThreadUpdate } from "../providers/ThreadProvider";
+import { convertDate } from "../util/Date";
 import {
   FaThumbsDown,
   FaThumbsUp,
@@ -14,9 +14,9 @@ import {
   FaCommentSlash,
 } from "react-icons/fa";
 import { ImArrowUp, ImArrowDown } from "react-icons/im";
-import IconBtn from "./components/IconBtn";
-import { getComments, addComment } from "./firebase";
-import { useAuth } from "./providers/AuthProvider";
+import IconBtn from "../components/IconBtn";
+import { getComments, addComment, getThread } from "../firebase";
+import { useAuth } from "../providers/AuthProvider";
 
 function getReplies(id) {
   const threadData = useThread();
@@ -28,14 +28,32 @@ function checkOrigPost(id) {
   return id === threadData.userid;
 }
 
+export const threadLoader = async () => {
+  const res = await useThread();
+  return res;
+};
+
 export default function ThreadView() {
   const threadData = useThread();
   const { id } = useParams();
   const [reply, setReply] = useState(false);
   const { currentUser } = useAuth();
   // console.log(getComments(threadData.id));
+  const data = getThread(id);
+  // useThreadUpdate(data);
 
-  const comments = getReplies(threadData.id);
+  // useEffect(() => {
+  //   console.log("thread render");
+  //   const data = getThread(id);
+  //   // const update = useThreadUpdate();
+  //   // // update(data);
+  //   // console.log(id);
+  //   // console.log(data);
+  //   // useThreadUpdate(data);
+  // }, []);
+
+  const comments = getReplies(id);
+  // console.log(threadData);
 
   return (
     <div>
@@ -51,7 +69,7 @@ export default function ThreadView() {
 
           <div className="thread-view_footer flex-r fs-200">
             <span className="fw-bold comment_op">{threadData.user}</span>
-            <span>{convertDate(threadData.createdAt.seconds)}</span>
+            {/* <span>{convertDate(threadData.createdAt.seconds)}</span> */}
           </div>
           <p>{threadData.content}</p>
         </div>
@@ -68,19 +86,13 @@ export default function ThreadView() {
           Log in to Reply
         </button>
       )}
-      {/* <div className="thread-view_comments">
-        {comments &&
-          comments.map((comment) => (
-            <Comment data={comment} key={comment.id} />
-          ))}
-      </div> */}
       <CommentList comments={comments} />
     </div>
   );
 }
 
 function ThreadSidebar() {
-  return <div className="thread-siderbar"></div>;
+  return <div className="thread-sidebar"></div>;
 }
 
 // function IconBtn({ Icon }) {
@@ -101,80 +113,6 @@ function CommentList({ comments }) {
     </div>
   );
 }
-
-// function CommentOg(props) {
-//   const { id, user, userid, rating, content, lastUpdated } = props.data;
-//   const [reply, setReply] = useState(false);
-//   const [showComments, setShowComments] = useState(true);
-//   const comments = getReplies(id);
-
-//   function toggleComments(state) {
-//     if (comments.length > 0) {
-//       setShowComments(state);
-//     }
-//   }
-
-//   return (
-//     <>
-//       <div className="comment post-container flex-r">
-//         <div className="comment_rating">
-//           <IconBtn Icon={ImArrowUp} aria-label="Like" />
-//           <span>{rating}</span>
-//           <IconBtn Icon={ImArrowDown} aria-label="Dislike" />
-//         </div>
-//         <div className="comment_post">
-//           <div className="comment_header flex-r fs-200">
-//             <span className="fw-bold">{user}</span>
-//             <span>{convertDate(lastUpdated.seconds)}</span>
-//           </div>
-//           <div className="comment_content">{content}</div>
-//           <div className="comment_footer flex">
-//             {/* <IconBtn Icon={FaThumbsUp} aria-label="Like" />
-//             <IconBtn Icon={FaThumbsDown} aria-label="Dislike" /> */}
-//             <IconBtn
-//               Icon={FaReply}
-//               func={() => setReply((prevState) => !prevState)}
-//               aria-label="Reply"
-//             />
-//             {showComments ? (
-//               <IconBtn
-//                 Icon={FaCommentSlash}
-//                 func={() => toggleComments(false)}
-//                 aria-label="Hide Comments"
-//               />
-//             ) : (
-//               <IconBtn
-//                 Icon={FaComment}
-//                 func={() => toggleComments(true)}
-//                 aria-label="Show Comments"
-//               />
-//             )}
-//             {userid === "formposter" && (
-//               <>
-//                 <IconBtn Icon={FaTrash} aria-label="Delete" />
-//                 <IconBtn Icon={FaRegEdit} aria-label="Edit" />
-//               </>
-//             )}
-//           </div>
-//         </div>
-//       </div>
-//       <CommentForm parentid={id} animate={reply} />
-//       {comments.length > 0 &&
-//         (showComments ? (
-//           <div className="comment_replies-container flex-r">
-//             <button
-//               className="replies_close-btn"
-//               aria-label="Hide Comments"
-//               onClick={() => setShowComments(false)}
-//             />
-//             <CommentList comments={comments} />
-//           </div>
-//         ) : (
-//           <button onClick={() => setShowComments(true)}>Load Comments</button>
-//         ))}
-//     </>
-//   );
-// }
 
 function Comment(props) {
   const { id, user, userid, rating, content, lastUpdated } = props.data;

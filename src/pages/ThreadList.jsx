@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useThreadUpdate } from "./providers/ThreadProvider";
-import { getThreads, threadsRef } from "./firebase";
+import { useThreadUpdate } from "../providers/ThreadProvider";
+import { getThreads, threadsRef } from "../firebase";
 import {
   query,
   orderBy,
@@ -10,10 +10,10 @@ import {
   where,
 } from "firebase/firestore";
 import { Link } from "react-router-dom";
-import IconBtn from "./components/IconBtn";
+import IconBtn from "../components/IconBtn";
 import { ImArrowUp, ImArrowDown } from "react-icons/im";
-import { convertDate } from "./util/Date";
-import { useAsync } from "./hooks/useAsync";
+import { convertDate } from "../util/Date";
+import { useAsync } from "../hooks/useAsync";
 
 export default function ThreadList() {
   // const [threads, setThreads] = useState([]);
@@ -58,14 +58,18 @@ function Thread(props) {
       <div>
         <Link
           to={`/thread/${id}`}
-          onClick={() => {
-            loadThread(props.data);
-          }}
+          // onClick={() => {
+          //   loadThread(props.data);
+          // }}
         >
-          <h2> {title}</h2>
+          <h2 className="thread_title"> {title}</h2>
         </Link>
-        <div className="thread_footer">
+        <div className="thread_info">
           Submitted {convertDate(createdAt.seconds)} by <span>{user}</span>
+        </div>
+        <div className="thread_footer">
+          <span>share</span>
+          <span>report</span>
         </div>
       </div>
     </div>

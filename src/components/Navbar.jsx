@@ -1,16 +1,20 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import FormDialog from "./components/FormDialog";
-import { addThread } from "./firebase";
-import { login, register, logout } from "./providers/AuthProvider";
-import { useAuth } from "./providers/AuthProvider";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import FormDialog from "./FormDialog";
+import { addThread } from "../firebase";
+import { login, register, logout } from "../providers/AuthProvider";
+import { useAuth } from "../providers/AuthProvider";
 import { BiLogInCircle, BiLogOutCircle } from "react-icons/bi";
-import { FaUserCircle, FaComments } from "react-icons/fa";
+import { FaUserCircle, FaComments, FaPlus, FaSearch } from "react-icons/fa";
+import IconBtn from "./IconBtn";
+import { useThemeUpdate } from "../providers/ThemeProvider";
 
 export default function Navbar() {
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [toggleMenu, setToggleMenu] = useState(false);
+  const toggleTheme = useThemeUpdate();
 
   function DropdownMenu() {
     function DropdownItem(props) {
@@ -67,8 +71,11 @@ export default function Navbar() {
             >
               FastLogin
             </DropdownButton>
+            <DropdownButton func={() => toggleTheme()}>
+              Toggle Theme
+            </DropdownButton>
             <DropdownButton
-              func={() => setShowForm(true)}
+              func={() => navigate("/Login")}
               leftIcon={<BiLogInCircle />}
             >
               Login
@@ -80,36 +87,36 @@ export default function Navbar() {
   }
 
   return (
-    <div className="">
-      <nav className="">
-        <ul>
-          <li>
-            <Link to="">Home</Link>
-          </li>
-          {currentUser && <li>{currentUser.displayName}</li>}
-        </ul>
-        <ul className="flex nav-test">
-          <li>
-            <a href="" className="nav-button">
-              New
-            </a>
-          </li>
-          <li>
-            <a
-              className="nav-button"
-              onClick={() => {
-                setToggleMenu((prevState) => !prevState);
-                console.log(toggleMenu);
-              }}
-            >
-              Menu
-              {toggleMenu && <DropdownMenu />}
-            </a>
-          </li>
-        </ul>
+    <nav className="nav-test">
+      <ul role="list" className="">
+        <li>
+          <NavLink to="/" className={"nav-button"}>
+            Home
+          </NavLink>
+        </li>
+        {currentUser && <li>{currentUser.displayName}</li>}
+      </ul>
+      <ul role="list" className="flex ">
+        <li>
+          <NavLink to="/submit" className="nav-button">
+            <IconBtn Icon={FaPlus} aria-label="New Thread" />
+          </NavLink>
+        </li>
+        <li>
+          <a
+            className="nav-button"
+            onClick={() => {
+              setToggleMenu((prevState) => !prevState);
+              console.log(toggleMenu);
+            }}
+          >
+            Menu
+            {toggleMenu && <DropdownMenu />}
+          </a>
+        </li>
+      </ul>
 
-        <FormDialog showForm={showForm} closeForm={() => setShowForm(false)} />
-      </nav>
-    </div>
+      <FormDialog showForm={showForm} closeForm={() => setShowForm(false)} />
+    </nav>
   );
 }
