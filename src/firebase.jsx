@@ -44,6 +44,7 @@ const threadsRef = collection(db, "threads");
 const storageRef = ref(storage);
 
 export function useStorage(file, id) {
+  //function to store images and lock them to thread id
   const fileRef = ref(
     storage,
     `images/${file.name}+${randomStringGenerator(10)}`
@@ -58,6 +59,7 @@ export function useStorage(file, id) {
 }
 
 export function getThread(id) {
+  //accepts thread id and registers data to current thread context
   const [thread, setThread] = useState();
   const func = useThreadUpdate();
 
@@ -65,22 +67,22 @@ export function getThread(id) {
     const docRef = doc(db, "threads", id);
     getDoc(docRef).then((doc) => {
       let item = { ...doc.data(), id: id };
-      console.log(item);
+      // console.log(item);
       setThread(item);
       func(item);
-      // useThreadUpdate(doc.data());
     });
   }, []);
 
-  // console.log(thread);
   return thread;
 }
 
-export function getThreads() {
+export function getThreads(sortType) {
+  //grab all starting thread posts and orders by specified field
   const [threads, setThreads] = useState([]);
 
   useEffect(() => {
-    const q = query(threadsRef, orderBy("lastUpdated"), limit(25));
+    const q = query(threadsRef, orderBy(sortType, "desc"), limit(25));
+    // console.log("test");
 
     const unsub = onSnapshot(q, (threadSnapshot) => {
       let threadOutput = [];
@@ -91,13 +93,15 @@ export function getThreads() {
     });
 
     return () => unsub();
-  }, []);
+  }, [sortType]);
 
   return threads;
   // return () => output();
 }
 
 export function addThread(user, uid, title, post, image) {
+  //creates a new thread to add to firestore
+
   const date = new Date();
   addDoc(threadsRef, {
     userid: uid,
@@ -117,6 +121,7 @@ export function addThread(user, uid, title, post, image) {
 }
 
 export function getComments(threadid, parentid) {
+  //fetches comments of a given post
   const [comments, setComments] = useState([]);
   const commentsRef = collection(db, `threads/${threadid}/comments`);
 
@@ -142,15 +147,20 @@ export function getComments(threadid, parentid) {
 }
 
 export function addComment(id, post, user, uid, parent) {
+  //adds doc as a comment registered to another doc
   const commentsRef = collection(db, `threads/${id}/comments`);
+  const datePosted = new Date();
 
   addDoc(commentsRef, {
     userid: uid,
     user: user,
-    lastUpdated: new Date(),
+    lastUpdated: datePosted,
     content: post,
     rating: 0,
     parent: parent,
+  }).then(() => {
+    const threadRef = doc(db, "threads", id);
+    updateDoc(threadRef, { lastUpdated: datePosted });
   });
 }
 

@@ -1,41 +1,52 @@
 import React, { useEffect, useState } from "react";
 import { useThreadUpdate } from "../providers/ThreadProvider";
 import { getThreads, threadsRef } from "../firebase";
-import {
-  query,
-  orderBy,
-  limit,
-  addDoc,
-  onSnapshot,
-  where,
-} from "firebase/firestore";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import IconBtn from "../components/IconBtn";
 import { ImArrowUp, ImArrowDown } from "react-icons/im";
+import { FaFireAlt, FaSeedling, FaChartLine } from "react-icons/fa";
+import { BsImageFill } from "react-icons/bs";
 import { convertDate } from "../util/Date";
 import { useAsync } from "../hooks/useAsync";
 
 export default function ThreadList() {
-  // const [threads, setThreads] = useState([]);
-  // const { loading, error, value: threads } = useAsync(getThreads);
+  const [sortType, setSortType] = useState("lastUpdated");
+  const threads = getThreads(sortType);
 
   // useEffect(() => {
-  //   const q = query(threadsRef, orderBy("lastUpdated"), limit(25));
-  //   const unsub = onSnapshot(q, (threadSnapshot) => {
-  //     let threadOutput = [];
-  //     threadSnapshot.docs.forEach((doc) => {
-  //       threadOutput.push({ ...doc.data(), id: doc.id });
-  //     });
-  //     setThreads(threadOutput);
-  //   });
-
-  //   return () => unsub();
-  // }, []);
-
-  const threads = getThreads();
+  //   let fetch = getThreads(sortType);
+  //   console.log(fetch);
+  // }, [sortType]);
 
   return (
     <div className="threadlist">
+      <div className="threadlist_header">
+        <ul role="list" className="flex-r threadlist_sort">
+          <li
+            className={
+              sortType === "lastUpdated" ? "threadlist_sort_active" : ""
+            }
+            onClick={() => setSortType("lastUpdated")}
+          >
+            <FaFireAlt />
+            <span>Hot</span>
+          </li>
+          <li
+            className={sortType === "createdAt" ? "threadlist_sort_active" : ""}
+            onClick={() => setSortType("createdAt")}
+          >
+            <FaSeedling />
+            <span>New</span>
+          </li>
+          <li
+            className={sortType === "rating" ? "threadlist_sort_active" : ""}
+            onClick={() => setSortType("rating")}
+          >
+            <FaChartLine />
+            <span>Popular</span>
+          </li>
+        </ul>
+      </div>
       {threads &&
         threads.map((thread) => <Thread data={thread} key={thread.id} />)}
     </div>
@@ -43,8 +54,18 @@ export default function ThreadList() {
 }
 
 function Thread(props) {
-  const { id, title, user, createdAt, rating, content, lastUpdated, userid } =
-    props.data;
+  const navigate = useNavigate();
+  const {
+    id,
+    title,
+    user,
+    createdAt,
+    rating,
+    content,
+    lastUpdated,
+    userid,
+    imageUrl,
+  } = props.data;
 
   const loadThread = useThreadUpdate();
 
@@ -55,9 +76,27 @@ function Thread(props) {
         <span>{rating}</span>
         <IconBtn Icon={ImArrowDown} aria-label="Dislike" />
       </div>
+      <div
+        className="thread_thumbnail-container"
+        style={{ border: imageUrl ? "none" : "" }}
+        onClick={() => navigate(`/thread/${id}`)}
+      >
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            className="thread_thumbnail"
+            alt="thread thumbnail"
+          />
+        ) : (
+          <div className="thread_thumbnail">
+            <BsImageFill />
+          </div>
+        )}
+      </div>
       <div>
         <Link
           to={`/thread/${id}`}
+          className="text-no_deco"
           // onClick={() => {
           //   loadThread(props.data);
           // }}

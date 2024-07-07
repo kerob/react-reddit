@@ -48,6 +48,7 @@ export function logout() {
 }
 
 export function useAuth() {
+  //Hook to access user auth token
   return useContext(AuthContext);
 }
 

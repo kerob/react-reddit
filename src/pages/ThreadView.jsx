@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
-import { useThread, useThreadUpdate } from "../providers/ThreadProvider";
-import { convertDate } from "../util/Date";
+import React, { useEffect, useRef, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useThread, useThreadUpdate } from '../providers/ThreadProvider';
+import { convertDate } from '../util/Date';
 import {
   FaThumbsDown,
   FaThumbsUp,
@@ -12,11 +12,12 @@ import {
   FaTrash,
   FaComment,
   FaCommentSlash,
-} from "react-icons/fa";
-import { ImArrowUp, ImArrowDown } from "react-icons/im";
-import IconBtn from "../components/IconBtn";
-import { getComments, addComment, getThread } from "../firebase";
-import { useAuth } from "../providers/AuthProvider";
+} from 'react-icons/fa';
+import { BsImageFill } from 'react-icons/bs';
+import { ImArrowUp, ImArrowDown } from 'react-icons/im';
+import IconBtn from '../components/IconBtn';
+import { getComments, addComment, getThread } from '../firebase';
+import { useAuth } from '../providers/AuthProvider';
 
 function getReplies(id) {
   const threadData = useThread();
@@ -35,6 +36,7 @@ export const threadLoader = async () => {
 
 export default function ThreadView() {
   const threadData = useThread();
+  const navigate = useNavigate();
   const { id } = useParams();
   const [reply, setReply] = useState(false);
   const { currentUser } = useAuth();
@@ -52,6 +54,18 @@ export default function ThreadView() {
   //   // useThreadUpdate(data);
   // }, []);
 
+  const handleImgClick = (e) => {
+    console.log(e.target.getAttribute('data-expand'));
+
+    let currentVal = e.target.getAttribute('data-expand');
+
+    if (currentVal === 'false') {
+      e.target.setAttribute('data-expand', 'true');
+    } else {
+      e.target.setAttribute('data-expand', 'false');
+    }
+  };
+
   const comments = getReplies(id);
   // console.log(threadData);
 
@@ -68,10 +82,27 @@ export default function ThreadView() {
           <h1>{threadData.title}</h1>
 
           <div className="thread-view_footer flex-r fs-200">
-            <span className="fw-bold comment_op">{threadData.user}</span>
+            <span className="fw-bold comment_poster comment_op">
+              {threadData.user}
+            </span>
             {/* <span>{convertDate(threadData.createdAt.seconds)}</span> */}
           </div>
-          <p>{threadData.content}</p>
+          <div className="thread-view_message-content">
+            {threadData.imageUrl ? (
+              <img
+                data-expand="false"
+                className="thread-img"
+                src={threadData.imageUrl}
+                alt="image post"
+                onClick={handleImgClick}
+              />
+            ) : (
+              <div className="thread-img__placeholder">
+                <BsImageFill />
+              </div>
+            )}
+            <p>{threadData.content}</p>
+          </div>
         </div>
       </div>
       <h3>Comments</h3>
@@ -81,9 +112,21 @@ export default function ThreadView() {
           animate={reply}
           closeHandler={() => setReply(false)}
         />
+      ) : currentUser ? (
+        <button
+          class="btn-post-comment"
+          aria-label="Login"
+          onClick={() => setReply(true)}
+        >
+          Post Comment
+        </button>
       ) : (
-        <button aria-label="Login" onClick={() => setReply(true)}>
-          Log in to Reply
+        <button
+          class="btn-post-comment"
+          aria-label="Login"
+          onClick={() => navigate('/login')}
+        >
+          Log in to reply
         </button>
       )}
       <CommentList comments={comments} />
@@ -95,17 +138,9 @@ function ThreadSidebar() {
   return <div className="thread-sidebar"></div>;
 }
 
-// function IconBtn({ Icon }) {
-//   return (
-//     <button>
-//       <span>
-//         <Icon />
-//       </span>
-//     </button>
-//   );
-// }
-
 function CommentList({ comments }) {
+  /* Container for thread comments */
+
   return (
     <div className="commentlist">
       {comments &&
@@ -120,6 +155,7 @@ function Comment(props) {
   const [showPost, setShowPost] = useState(true);
   const [showComments, setShowComments] = useState(true);
   const comments = getReplies(id);
+  const navigate = useNavigate();
   const { currentUser } = useAuth();
 
   function toggleComments(state) {
@@ -147,13 +183,13 @@ function Comment(props) {
             <div className="comment_post">
               <div className="comment_header flex-r fs-200">
                 <span
-                  className={`fw-bold ${
+                  className={`fw-bold comment_poster ${
                     currentUser &&
                     currentUser.uid === userid &&
-                    "comment_current-user"
+                    'comment_current-user'
                   }
                   
-                  ${checkOrigPost(userid) && "comment_op"}`}
+                  ${checkOrigPost(userid) && 'comment_op'}`}
                 >
                   {user}
                 </span>
@@ -165,7 +201,11 @@ function Comment(props) {
             <IconBtn Icon={FaThumbsDown} aria-label="Dislike" /> */}
                 <IconBtn
                   Icon={FaReply}
-                  func={() => setReply((prevState) => !prevState)}
+                  func={() =>
+                    currentUser
+                      ? setReply((prevState) => !prevState)
+                      : navigate('/login')
+                  }
                   aria-label="Reply"
                 />
                 {showComments ? (
@@ -181,7 +221,7 @@ function Comment(props) {
                     aria-label="Show Comments"
                   />
                 )}
-                {userid === "formposter" && (
+                {userid === 'formposter' && (
                   <>
                     <IconBtn Icon={FaTrash} aria-label="Delete" />
                     <IconBtn Icon={FaRegEdit} aria-label="Edit" />
@@ -232,15 +272,16 @@ function CommentForm({ parentid, animate, closeHandler }) {
   const { currentUser } = useAuth();
 
   const mountedStyle = {
-    animation: "inAnimation 250ms ease-in",
+    animation: 'inAnimation 250ms ease-in',
   };
   const unmountedStyle = {
-    animation: "outAnimation 270ms ease-out",
-    animationFillMode: "forwards",
+    animation: 'outAnimation 270ms ease-out',
+    animationFillMode: 'forwards',
   };
 
   return (
     <div
+      // data-visible={animate ? "true" : "false"}
       className="flex-r comment_form"
       style={animate ? mountedStyle : unmountedStyle}
     >
@@ -256,7 +297,7 @@ function CommentForm({ parentid, animate, closeHandler }) {
             currentUser.uid,
             parentid
           );
-          formVal.current.value = "";
+          formVal.current.value = '';
           closeHandler();
         }}
       >

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { addThread } from "../firebase";
 import { useAuth } from "../providers/AuthProvider";
@@ -8,6 +8,14 @@ export default function CreateThread() {
   const [file, setFile] = useState(null);
   const [fileError, setFileError] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!currentUser) {
+      setTimeout(() => {
+        navigate("/login");
+      }, 1000);
+    }
+  }, []);
 
   const handleFile = (e) => {
     const types = ["image/png", "image/jpeg"];
@@ -48,26 +56,39 @@ export default function CreateThread() {
   }
 
   return (
-    <div className="create-thread post-container">
-      <h2>Create A New Thread</h2>
-      <form className="create-thread__form" onSubmit={handleCreateThread}>
-        <label htmlFor="title">Title</label>
-        <input type="text" name="title" placeholder="Enter Title" required />
-        <label htmlFor="img" style={fileError ? { color: "red" } : {}}>
-          {fileError ? fileError : "Select an Image (PNG or JPG)"}
-        </label>
-        <input
-          type="file"
-          name="image"
-          accept=".jpg, .jpeg, .png"
-          onChange={handleFile}
-        />
-        <label htmlFor="content">Text</label>
-        <textarea type="text" name="content" placeholder="Enter Text" />
-        <button className="create-thread__button" type="submit">
-          Submit
-        </button>
-      </form>
+    <div className="centered">
+      {currentUser ? (
+        <div className="create-thread post-container">
+          <h2>Create A New Thread</h2>
+          <form className="create-thread__form" onSubmit={handleCreateThread}>
+            <label htmlFor="title">Title</label>
+            <input
+              type="text"
+              name="title"
+              placeholder="Enter Title"
+              required
+            />
+            <label htmlFor="img" style={fileError ? { color: "red" } : {}}>
+              {fileError ? fileError : "Select an Image (PNG or JPG)"}
+            </label>
+            <input
+              type="file"
+              name="image"
+              accept=".jpg, .jpeg, .png"
+              onChange={handleFile}
+            />
+            <label htmlFor="content">Text</label>
+            <textarea type="text" name="content" placeholder="Enter Text" />
+            <button className="create-thread__button" type="submit">
+              Submit
+            </button>
+          </form>
+        </div>
+      ) : (
+        <div>
+          We need you to login for that! Redirecting you to the login page
+        </div>
+      )}
     </div>
   );
 }

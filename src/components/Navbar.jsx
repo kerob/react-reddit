@@ -1,13 +1,19 @@
-import { useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
-import FormDialog from "./FormDialog";
-import { addThread } from "../firebase";
-import { login, register, logout } from "../providers/AuthProvider";
-import { useAuth } from "../providers/AuthProvider";
-import { BiLogInCircle, BiLogOutCircle } from "react-icons/bi";
-import { FaUserCircle, FaComments, FaPlus, FaSearch } from "react-icons/fa";
-import IconBtn from "./IconBtn";
-import { useThemeUpdate } from "../providers/ThemeProvider";
+import { useState } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import FormDialog from './FormDialog';
+import { addThread } from '../firebase';
+import { login, register, logout } from '../providers/AuthProvider';
+import { useAuth } from '../providers/AuthProvider';
+import { BiLogInCircle, BiLogOutCircle } from 'react-icons/bi';
+import {
+  FaUserCircle,
+  FaComments,
+  FaPlus,
+  FaSearch,
+  FaHome,
+} from 'react-icons/fa';
+import IconBtn from './IconBtn';
+import { useThemeUpdate } from '../providers/ThemeProvider';
 
 export default function Navbar() {
   const { currentUser } = useAuth();
@@ -37,7 +43,7 @@ export default function Navbar() {
       );
     }
     return (
-      <div className="nav-menu dropdown">
+      <div className="nav-menu dropdown-menu">
         {currentUser ? (
           <>
             {/* <DropdownItem>thing</DropdownItem> */}
@@ -46,8 +52,8 @@ export default function Navbar() {
                 addThread(
                   currentUser.displayName,
                   currentUser.uid,
-                  "test 3 thread",
-                  "this is a new thread"
+                  'test 3 thread',
+                  'this is a new thread'
                 )
               }
               leftIcon={<FaComments />}
@@ -66,16 +72,11 @@ export default function Navbar() {
           </>
         ) : (
           <>
-            <DropdownButton
-              func={() => login("email", "tester@test.com", "tester")}
-            >
-              FastLogin
-            </DropdownButton>
-            <DropdownButton func={() => toggleTheme()}>
+            {/* <DropdownButton func={() => toggleTheme()}>
               Toggle Theme
-            </DropdownButton>
+            </DropdownButton> */}
             <DropdownButton
-              func={() => navigate("/Login")}
+              func={() => navigate('/login')}
               leftIcon={<BiLogInCircle />}
             >
               Login
@@ -90,29 +91,65 @@ export default function Navbar() {
     <nav className="nav-test">
       <ul role="list" className="">
         <li>
-          <NavLink to="/" className={"nav-button"}>
-            Home
+          <NavLink to="/" className={'nav-button'}>
+            <IconBtn Icon={FaHome} />
           </NavLink>
         </li>
-        {currentUser && <li>{currentUser.displayName}</li>}
       </ul>
-      <ul role="list" className="flex ">
+      <ul role="list" className="flex">
         <li>
-          <NavLink to="/submit" className="nav-button">
-            <IconBtn Icon={FaPlus} aria-label="New Thread" />
-          </NavLink>
+          {currentUser ? (
+            <NavLink to="/submit" className="nav-button">
+              <IconBtn Icon={FaPlus} aria-label="New Thread" />
+            </NavLink>
+          ) : (
+            <NavLink to="/login" className="fw-bold nav-button nav-button-long">
+              Log In
+            </NavLink>
+          )}
         </li>
-        <li>
+        <li className="dropdown">
           <a
-            className="nav-button"
+            className="nav-button hamburger"
             onClick={() => {
               setToggleMenu((prevState) => !prevState);
-              console.log(toggleMenu);
             }}
+            aria-controls="primary-navigation"
+            aria-expanded={toggleMenu}
           >
-            Menu
-            {toggleMenu && <DropdownMenu />}
+            <svg
+              fill="var(--button-color)"
+              // className="hamburger"
+              viewBox="0 0 100 100"
+              width="250"
+            >
+              <rect
+                className="line top"
+                width="80"
+                height="10"
+                x="10"
+                y="25"
+                rx="5"
+              ></rect>
+              <rect
+                className="line middle"
+                width="80"
+                height="10"
+                x="10"
+                y="45"
+                rx="5"
+              ></rect>
+              <rect
+                className="line bottom"
+                width="80"
+                height="10"
+                x="10"
+                y="65"
+                rx="5"
+              ></rect>
+            </svg>
           </a>
+          {toggleMenu && <DropdownMenu />}
         </li>
       </ul>
 
