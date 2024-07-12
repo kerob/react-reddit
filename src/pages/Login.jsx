@@ -14,7 +14,7 @@ export default function Login() {
     }
   }, []);
 
-  function handleCreateThread(e) {
+  function handleLogin(e) {
     e.preventDefault();
 
     const form = e.target;
@@ -32,7 +32,7 @@ export default function Login() {
       ) : (
         <div className="sign-in post-container">
           <h2>Sign In</h2>
-          <form className="sign-in__form" onSubmit={handleCreateThread}>
+          <form className="sign-in__form" onSubmit={handleLogin}>
             <label htmlFor="email">Email</label>
             <input
               type="email"
@@ -40,7 +40,9 @@ export default function Login() {
               placeholder="Enter Email"
               required
             />
-            <label htmlFor="title">Password</label>
+            <label htmlFor="title">
+              Password <span>Error</span>
+            </label>
             <input
               type="password"
               name="password"

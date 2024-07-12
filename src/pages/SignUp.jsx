@@ -1,8 +1,11 @@
 import React from 'react';
 import { register } from '../providers/AuthProvider';
+import { useNavigate } from 'react-router-dom';
 
 export default function SignUp() {
-  function handleCreateThread(e) {
+  const navigate = useNavigate();
+
+  function handleFormSubmit(e) {
     e.preventDefault();
 
     const form = e.target;
@@ -12,6 +15,7 @@ export default function SignUp() {
 
     if (formJson.password === formJson.passwordCheck) {
       register('email', formJson.email, formJson.password, formJson.username);
+      navigate('/');
     } else {
       console.log('Log in to create thread');
     }
@@ -21,7 +25,7 @@ export default function SignUp() {
     <div className="centered">
       <div className="sign-in post-container">
         <h2>Register An Account</h2>
-        <form className="sign-in__form" onSubmit={handleCreateThread}>
+        <form className="sign-in__form" onSubmit={handleFormSubmit}>
           <label htmlFor="email">Email</label>
           <input type="email" name="email" placeholder="Enter Email" required />
           <label htmlFor="title">Username</label>
